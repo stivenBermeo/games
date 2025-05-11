@@ -8,6 +8,8 @@ function TicTacToe () {
     [null, null, null]
   ]));
   const [turn, setTurn] = useState(true)
+  const [scoreX, setScoreX] = useState(0)
+  const [scoreO, setScoreO] = useState(0)
   const [board, setBoard] = useState(boardInitialStateGen())
   const [isSinglePlayer, setIsSinglePlayer] = useState(true)
 
@@ -51,6 +53,7 @@ function TicTacToe () {
 
     if (combinations.includes(winnerValue)) {
       toast(`${turn ? 'X' : 'O' } Wins!`)
+      turn ? setScoreX(scoreX + 1) : setScoreO(scoreO + 1)
       return resetBoard()
     }
 
@@ -95,6 +98,8 @@ function TicTacToe () {
   function toggleSinglePlayer() {
     resetBoard()
     setIsSinglePlayer(!isSinglePlayer)
+    setScoreX(0)
+    setScoreO(0)
   }
 
   function Cell({ x, y }) {
@@ -108,7 +113,7 @@ function TicTacToe () {
   return <>
     <div className="my-5 tic-tac-toe-score d-flex justify-content-between">
       <div className="btn btn-primary" onClick={toggleSinglePlayer}>Playing: {isSinglePlayer ? 'Single Player' : 'Two players'}</div>
-      <div className="btn btn-light">Score: X () O ()</div>
+      <div className="btn btn-light">Score: X ({scoreX}) O ({scoreO})</div>
     </div>
     <div className="tic-tac-toe bg-dark my-1">
       <div className="d-flex row justify-content-center">
