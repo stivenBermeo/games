@@ -1,14 +1,84 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { toast } from 'react-toastify';
 
 function TicTacToe () {
-  const boardInitialState = [
+  const boardInitialStateGen = () => JSON.parse(JSON.stringify([
     [null, null, null],
     [null, null, null],
     [null, null, null]
-  ];
-  const [oddTurn, setOddTurn] = useState(true)
-  const [board, setBoard] = useState(JSON.parse(JSON.stringify(boardInitialState)))
+  ]));
+  const [turn, setTurn] = useState(true)
+  const [board, setBoard] = useState(boardInitialStateGen())
+  const [isSinglePlayer, setIsSinglePlayer] = useState(true)
+
+  useEffect(()=>{
+    if (JSON.stringify(board) !== JSON.stringify(boardInitialStateGen())) {
+      checkBoard()
+    }
+  }, [board])
+
+  useEffect(()=>{
+    if (JSON.stringify(board) !== JSON.stringify(boardInitialStateGen())) {
+      if (isSinglePlayer && !turn) {
+        setTimeout(makeComputerMove, 700)
+      }
+    }
+  }, [turn])
+
+
+  function resetBoard() {
+    setBoard(boardInitialStateGen())
+    setTurn(true)
+  }
+
+  function checkBoard() {
+    const combinations = [
+      // Horizontals
+      `${board[0][0]}${board[0][1]}${board[0][2]}`,
+      `${board[1][0]}${board[1][1]}${board[1][2]}`,
+      `${board[2][0]}${board[2][1]}${board[2][2]}`,
+      // Verticals
+      `${board[0][0]}${board[1][0]}${board[2][0]}`,
+      `${board[0][1]}${board[1][1]}${board[2][1]}`,
+      `${board[0][2]}${board[1][2]}${board[2][2]}`,
+
+      // Diagonals
+      `${board[0][0]}${board[1][1]}${board[2][2]}`,
+      `${board[2][0]}${board[1][1]}${board[0][2]}`,
+    ]
+
+    const winnerValue = turn ? 'truetruetrue' : 'falsefalsefalse';
+
+    if (combinations.includes(winnerValue)) {
+      toast(`${turn ? 'X' : 'O' } Wins!`)
+      return resetBoard()
+    }
+
+    const emptyCells = getEmptyCells()
+    if (emptyCells.length === 0) {
+      toast(`Stalemate!`)
+      return resetBoard()
+    }
+    setTurn(!turn)
+  }
+
+  function getEmptyCells() {
+    const emptyCells = []
+
+    for (let x = 0; x < 3; x++) {
+      for (let y = 0; y < 3; y++) {
+        if (board[x][y] === null) emptyCells.push([x, y])
+      }
+    }
+
+    return emptyCells
+  }
+
+  function makeComputerMove() {
+    const emptyCells = getEmptyCells()
+    const [x, y] =  emptyCells[Math.floor(Math.random() * emptyCells.length)]
+    markCell(x, y, true)
+  }
 
   function markCell(x,y) {
     if (board[x][y] !== null) {
@@ -17,47 +87,29 @@ function TicTacToe () {
     }
 
     const newBoard = JSON.parse(JSON.stringify(board))
-    newBoard[x][y] = !oddTurn
-    
-    const combinations = [
-      // Horizontals
-      `${newBoard[0][0]}${newBoard[0][1]}${newBoard[0][2]}`,
-      `${newBoard[1][0]}${newBoard[1][1]}${newBoard[1][2]}`,
-      `${newBoard[2][0]}${newBoard[2][1]}${newBoard[2][2]}`,
-      // Verticals
-      `${newBoard[0][0]}${newBoard[1][0]}${newBoard[2][0]}`,
-      `${newBoard[0][1]}${newBoard[1][1]}${newBoard[2][1]}`,
-      `${newBoard[0][2]}${newBoard[1][2]}${newBoard[2][2]}`,
-
-      // Diagonals
-      `${newBoard[0][0]}${newBoard[1][1]}${newBoard[2][2]}`,
-      `${newBoard[2][0]}${newBoard[1][1]}${newBoard[0][2]}`,
-    ]
-
-    if (combinations.includes('truetruetrue')) {
-      toast('O Wins!')
-      return setBoard(JSON.parse(JSON.stringify(boardInitialState)))
-    }
-    if (combinations.includes('falsefalsefalse')) {
-      toast('X Wins!')
-      return setBoard(JSON.parse(JSON.stringify(boardInitialState)))
-    }
+    newBoard[x][y] = turn
 
     setBoard(newBoard)
-    setOddTurn(!oddTurn)
+  }
+
+  function toggleSinglePlayer() {
+    resetBoard()
+    setIsSinglePlayer(!isSinglePlayer)
   }
 
   function Cell({ x, y }) {
     const value = board[x][y];
     return <div className="btn btn-dark d-inline cell align-middle text-center " onClick={()=>{markCell(x,y)}}>
-      {value === true && 'o'}
-      {value === false && 'x'}
+      {value && 'x'}
+      {value === false && 'o'}
     </div>
   }
-
-  console.log({ board })
+  console.log('render')
   return <>
-    <div className="tic-tac-toe bg-dark mx-auto my-5">
+    <div className="my-5">
+      <div className="btn btn-primary" onClick={toggleSinglePlayer}>Playing: {isSinglePlayer ? 'Single Player' : 'Two players'}</div>
+    </div>
+    <div className="tic-tac-toe bg-dark my-1">
       <div className="d-flex row justify-content-center">
         <Cell x={0} y={0}/>
         <Cell x={0} y={1}/>
