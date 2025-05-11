@@ -6,7 +6,7 @@ import { ToastContainer } from 'react-toastify';
 import './index.css'
 import App from './App.jsx'
 import NavBar from './components/NavBar.jsx';
-import TicTacToe from './components/TicTacToe.jsx';
+import TicTacToe from './components/TicTacToe';
 
 createRoot(document.getElementById('root')).render(
   <>

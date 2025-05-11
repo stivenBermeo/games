@@ -104,10 +104,11 @@ function TicTacToe () {
       {value === false && 'o'}
     </div>
   }
-  console.log('render')
+
   return <>
-    <div className="my-5">
+    <div className="my-5 tic-tac-toe-score d-flex justify-content-between">
       <div className="btn btn-primary" onClick={toggleSinglePlayer}>Playing: {isSinglePlayer ? 'Single Player' : 'Two players'}</div>
+      <div className="btn btn-light">Score: X () O ()</div>
     </div>
     <div className="tic-tac-toe bg-dark my-1">
       <div className="d-flex row justify-content-center">

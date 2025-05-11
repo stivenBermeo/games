@@ -1,7 +1,11 @@
 body {
   background-color: #212529;
+  padding-top: 55px
 }
 
+.tic-tac-toe-score {
+  width: 30rem;
+}
 .tic-tac-toe {
   width: 30rem;
   height: 30rem;
