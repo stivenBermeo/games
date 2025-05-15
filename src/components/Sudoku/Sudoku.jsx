@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './sudoku.css'
+import { toast } from 'react-toastify';
 
 const Sudoku = () => {
   const getFreshBoard = (from = null) => JSON.parse(JSON.stringify(from ?? [
@@ -16,7 +17,22 @@ const Sudoku = () => {
 
   const [selectedCell, setSelectedCell] = useState([0, 0])
   const [board, setBoard] = useState(getFreshBoard())
+  const [solutionBoard, setSolutionBoard] = useState(getFreshBoard())
+  
 
+  useEffect(()=>{
+    if (JSON.stringify(getFreshBoard(solutionBoard)) === JSON.stringify(getFreshBoard())) {
+      const virtualBoard = getFreshBoard(solutionBoard)
+      virtualBoard[0][0] = 9
+      setSolutionBoard(virtualBoard)
+    }
+  }, [solutionBoard])
+
+  useEffect(()=>{
+    if (JSON.stringify(board) !== JSON.stringify(getFreshBoard())) {
+      checkBoard()
+    }
+  }, [board])
 
   const selectCell = (x, y) => {
     setSelectedCell([x, y])
@@ -33,10 +49,16 @@ const Sudoku = () => {
     return <div className={className} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{boardValue && boardValue}</div>
   }
 
+  const checkBoard = () => {
+    if (JSON.stringify(getFreshBoard(solutionBoard)) === JSON.stringify(getFreshBoard(board))) {
+      toast('Success')
+    }
+  }
+
   const fillCell = (value) => {
     const virtualBoard = getFreshBoard(board)
     const [selectedRow, selectedColumn] = selectedCell;
-    virtualBoard[selectedRow][selectedColumn] = value
+    virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === board[selectedRow][selectedColumn] ? undefined : value
     setBoard(virtualBoard)
   }
 
