@@ -28,6 +28,9 @@ function NavBar(){
             <li className="nav-item">
               <a className="nav-link" href="/tic-tac-toe">Tic Tac Toe</a>
             </li>
+            <li className="nav-item">
+              <a className="nav-link" href="/sudoku">Sudoku</a>
+            </li>
             {/* <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                 Dropdown
