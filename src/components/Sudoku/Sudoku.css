@@ -32,6 +32,6 @@
   }
 
   .selected-value:not(.selected-cell) {
-    color: red
+    color: green 
   }
 }

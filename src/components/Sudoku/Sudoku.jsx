@@ -15,6 +15,7 @@ const Sudoku = () => {
     new Array(9),
   ]));
 
+  const [invalidCells, setInvalidCells] = useState([])
   const [selectedCell, setSelectedCell] = useState([0, 0])
   const [board, setBoard] = useState(getFreshBoard())
   const [solutionBoard, setSolutionBoard] = useState(getFreshBoard())
@@ -39,6 +40,81 @@ const Sudoku = () => {
   }
 
 
+  const getRepeatsInArray = (array) => {
+    const repeatedValues = []
+    const repeatedIndexes = []
+
+    const joinedRow = array.join(',')
+    const duplicatedNumberRegex = /(\d)(?=.*\1)/g
+    const matches = [...joinedRow.matchAll(duplicatedNumberRegex)]
+    if (matches.length) {
+      matches.forEach(([matchedValue])=>{repeatedValues.push(Number(matchedValue))})
+      array.forEach((value, index) => { if (repeatedValues.includes(value)) repeatedIndexes.push(index)})
+    }
+    return repeatedIndexes
+  }
+
+  const validateRules = () => {
+    const repeats = []
+    const chunkCoords = [
+      [0,0],
+      [0,3],
+      [0,6],
+      [3,0],
+      [3,3],
+      [3,6],
+      [6,0],
+      [6,3],
+      [6,6],
+    ]
+  
+    for (let i = 0; i < 9; i++) {
+      // no repeats on row
+      const repeatsInRow = getRepeatsInArray(board[i])
+      repeats.push(...repeatsInRow.map(column => `${i},${column}`))
+
+      // no repeats on column
+      const repeatsInColumn = getRepeatsInArray((new Array(9)).fill().map((_value, index) => board[index][i]))
+      repeats.push(...repeatsInColumn.map(row => `${row},${i}`))
+
+      // no repeats in chunk
+      
+      const [x, y] = chunkCoords[i]
+      const chunkIndexes = [
+        [x, y],
+        [x, y+1],
+        [x, y+2],
+        [x+1, y],
+        [x+1, y+1],
+        [x+1, y+2],
+        [x+2, y],
+        [x+2, y+1],
+        [x+2, y+2],
+      ]
+      const repeatsInChunk = getRepeatsInArray([...chunkIndexes.map(([x,y])=>board[x][y])])
+      repeats.push(...repeatsInChunk.map(i => `${chunkIndexes[i][0]},${chunkIndexes[i][1]}`))
+    }
+
+    setInvalidCells(repeats)
+  }
+
+  const checkBoard = () => {
+    if (JSON.stringify(getFreshBoard(solutionBoard)) === JSON.stringify(getFreshBoard(board))) {
+      return toast('Success')
+    }
+
+
+    validateRules()
+  }
+
+  const fillCell = (value) => {
+    const virtualBoard = getFreshBoard(board)
+    const [selectedRow, selectedColumn] = selectedCell;
+    virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === value ? undefined : value
+    setBoard(virtualBoard)
+  }
+
+
   const Cell = ({ x, y }) => {
     const [selectedRow, selectedColumn] = selectedCell;
 
@@ -47,23 +123,11 @@ const Sudoku = () => {
     const selectedSectionClass = (selectedRow === x || selectedColumn === y) && 'selected-section'
     const selectedCellClass = (selectedRow === x && selectedColumn === y) && 'selected-cell'
     const selectedValueClass = selectedValue === boardValue && 'selected-value'
+    const invalidCellClass = invalidCells.find(coordinate => coordinate === `${x},${y}`) && 'text-danger'
 
-    const className = `sudoku-cell ${selectedSectionClass} ${selectedCellClass} ${selectedValueClass}`
+    const className = invalidCellClass ? invalidCellClass : `${selectedSectionClass} ${selectedCellClass} ${selectedValueClass}`
 
-    return <div className={className} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{boardValue && boardValue}</div>
-  }
-
-  const checkBoard = () => {
-    if (JSON.stringify(getFreshBoard(solutionBoard)) === JSON.stringify(getFreshBoard(board))) {
-      toast('Success')
-    }
-  }
-
-  const fillCell = (value) => {
-    const virtualBoard = getFreshBoard(board)
-    const [selectedRow, selectedColumn] = selectedCell;
-    virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === value ? undefined : value
-    setBoard(virtualBoard)
+    return <div className={`sudoku-cell ${className}`} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{boardValue && boardValue}</div>
   }
 
   return <>
