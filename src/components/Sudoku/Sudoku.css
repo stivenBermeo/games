@@ -12,7 +12,11 @@
     width: 3rem;
     height: 3rem;
     background-color: white;
-    border: solid 1px lightgray
+    border: solid 1px lightgray;
+    font-weight: bolder;
+    text-align: center; 
+    font-size: 2rem;
+    vertical-align: middle;
   }
 
   .sudoku-row:nth-child(3), .sudoku-row:nth-child(6) {
@@ -25,5 +29,9 @@
 
   .selected-cell {
     background-color: blue;
+  }
+
+  .selected-value:not(.selected-cell) {
+    color: red
   }
 }

@@ -43,8 +43,12 @@ const Sudoku = () => {
     const [selectedRow, selectedColumn] = selectedCell;
 
     const boardValue = board[x][y]
+    const selectedValue = board[selectedRow][selectedColumn]
+    const selectedSectionClass = (selectedRow === x || selectedColumn === y) && 'selected-section'
+    const selectedCellClass = (selectedRow === x && selectedColumn === y) && 'selected-cell'
+    const selectedValueClass = selectedValue === boardValue && 'selected-value'
 
-    const className = `sudoku-cell ${(selectedRow === x || selectedColumn === y) && 'selected-section'} ${(selectedRow === x && selectedColumn === y) && 'selected-cell'}`
+    const className = `sudoku-cell ${selectedSectionClass} ${selectedCellClass} ${selectedValueClass}`
 
     return <div className={className} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{boardValue && boardValue}</div>
   }
@@ -58,7 +62,7 @@ const Sudoku = () => {
   const fillCell = (value) => {
     const virtualBoard = getFreshBoard(board)
     const [selectedRow, selectedColumn] = selectedCell;
-    virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === board[selectedRow][selectedColumn] ? undefined : value
+    virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === value ? undefined : value
     setBoard(virtualBoard)
   }
 
