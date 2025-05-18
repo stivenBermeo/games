@@ -18,19 +18,27 @@ const Sudoku = () => {
   const [invalidCells, setInvalidCells] = useState([])
   const [selectedCell, setSelectedCell] = useState([0, 0])
   const [board, setBoard] = useState(getFreshBoard())
-  const [solutionBoard, setSolutionBoard] = useState(getFreshBoard())
+  const [solutionBoard, setSolutionBoard] = useState(null)
+  const [templateBoard, setTemplateBoard] = useState(null)
+
+  useEffect(()=>{
   
-
-  useEffect(()=>{
-    if (JSON.stringify(getFreshBoard(solutionBoard)) === JSON.stringify(getFreshBoard())) {
-      const virtualBoard = getFreshBoard(solutionBoard)
-      virtualBoard[0][0] = 9
-      setSolutionBoard(virtualBoard)
+    if (solutionBoard === null) {
+      fetch('https://sudoku-api.vercel.app/api/dosuku')
+      .then(response => response.json())
+      .then(data => {
+        const grid = data.newboard.grids[0]
+        console.log({grid})
+        setSolutionBoard(grid.solution)
+        setTemplateBoard(grid.value)
+        setBoard(grid.value)
+      })
     }
-  }, [solutionBoard])
+    
+  })
 
   useEffect(()=>{
-    if (JSON.stringify(board) !== JSON.stringify(getFreshBoard())) {
+    if (![JSON.stringify(getFreshBoard()), JSON.stringify(templateBoard)].includes(JSON.stringify(board))) {
       checkBoard()
     }
   }, [board])
@@ -45,7 +53,7 @@ const Sudoku = () => {
     const repeatedIndexes = []
 
     const joinedRow = array.join(',')
-    const duplicatedNumberRegex = /(\d)(?=.*\1)/g
+    const duplicatedNumberRegex = /([1-9])(?=.*\1)/g
     const matches = [...joinedRow.matchAll(duplicatedNumberRegex)]
     if (matches.length) {
       matches.forEach(([matchedValue])=>{repeatedValues.push(Number(matchedValue))})
@@ -108,8 +116,9 @@ const Sudoku = () => {
   }
 
   const fillCell = (value) => {
-    const virtualBoard = getFreshBoard(board)
     const [selectedRow, selectedColumn] = selectedCell;
+    if (templateBoard?.[selectedRow]?.[selectedColumn]) return
+    const virtualBoard = getFreshBoard(board)
     virtualBoard[selectedRow][selectedColumn] = virtualBoard[selectedRow][selectedColumn] === value ? undefined : value
     setBoard(virtualBoard)
   }
@@ -119,15 +128,17 @@ const Sudoku = () => {
     const [selectedRow, selectedColumn] = selectedCell;
 
     const boardValue = board[x][y]
+    const templateValue = templateBoard?.[x]?.[y]
     const selectedValue = board[selectedRow][selectedColumn]
     const selectedSectionClass = (selectedRow === x || selectedColumn === y) && 'selected-section'
     const selectedCellClass = (selectedRow === x && selectedColumn === y) && 'selected-cell'
     const selectedValueClass = selectedValue === boardValue && 'selected-value'
     const invalidCellClass = invalidCells.find(coordinate => coordinate === `${x},${y}`) && 'text-danger'
 
-    const className = invalidCellClass ? invalidCellClass : `${selectedSectionClass} ${selectedCellClass} ${selectedValueClass}`
+    const className =  invalidCellClass ? invalidCellClass : `${selectedSectionClass} ${selectedCellClass} ${selectedValueClass}`
 
-    return <div className={`sudoku-cell ${className}`} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{boardValue && boardValue}</div>
+
+    return <div className={`sudoku-cell ${Boolean(templateValue) && 'template-cell'} ${className}`} data-x={x} data-y={y} onClick={() => {selectCell(x, y)}}>{Boolean(boardValue) &&  boardValue}</div>
   }
 
   return <>
