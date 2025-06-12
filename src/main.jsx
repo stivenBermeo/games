@@ -7,6 +7,7 @@ import './index.css'
 import App from './App.jsx'
 import NavBar from './components/NavBar.jsx';
 import TicTacToe from './components/TicTacToe';
+import PlayGround from './components/PlayGround';
 import Sudoku from './components/Sudoku';
 
 createRoot(document.getElementById('root')).render(
@@ -18,6 +19,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="/"  element={<App/>}/>
           <Route path="/tic-tac-toe"  element={<TicTacToe/>}/>
           <Route path="/sudoku"  element={<Sudoku/>}/>
+          <Route path="/playground"  element={<PlayGround/>}/>
         </Routes>
       </BrowserRouter>
       <ToastContainer/>
