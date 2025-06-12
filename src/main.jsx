@@ -19,7 +19,9 @@ createRoot(document.getElementById('root')).render(
           <Route path="/"  element={<App/>}/>
           <Route path="/tic-tac-toe"  element={<TicTacToe/>}/>
           <Route path="/sudoku"  element={<Sudoku/>}/>
-          <Route path="/playground"  element={<PlayGround/>}/>
+          <Route path="/playground"  element={<PlayGround/>}>
+            <Route path="homy"  element={<TicTacToe/>}/>
+          </Route>
         </Routes>
       </BrowserRouter>
       <ToastContainer/>

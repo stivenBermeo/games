@@ -1,5 +1,6 @@
 import React from "react";
 import { useState } from "react"
+import { Link } from "react-router";
 
 function NavBar(){
   const [showOffCanvas, setShowOffCanvas] = useState(false);
@@ -29,10 +30,10 @@ function NavBar(){
               <a className="nav-link" href="/tic-tac-toe">Tic Tac Toe</a>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/sudoku">Sudoku</a>
+              <Link className="nav-link" to="/sudoku">Sudoku</Link>
             </li>
             <li className="nav-item">
-              <a className="nav-link" href="/playground">Playground</a>
+              <Link className="nav-link" to="/playground">Playground</Link>
             </li>
             {/* <li className="nav-item dropdown">
               <a className="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
