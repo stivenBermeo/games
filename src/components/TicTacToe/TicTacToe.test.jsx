@@ -37,6 +37,12 @@ describe('TicTacToe Component', () => {
     await user.click(toggleButton)
   }
 
+  // Utility function to wait for computer move
+  const waitForComputerMove = async () => {
+    // Wait for computer move (700ms delay + buffer)
+    await new Promise(resolve => setTimeout(resolve, 800))
+  }
+
   // Utility function to create a stalemate board
   const createStalemateBoard = async (user, cells) => {
     // Creates a stalemate board: X | O | X, X | O | O, O | X | X
@@ -120,7 +126,7 @@ describe('TicTacToe Component', () => {
       })
     })
 
-    it.skip('should not allow clicking on already filled cells', async () => {
+    it('should not allow clicking on already filled cells', async () => {
       render(<TicTacToe />)
       
       // Switch to two-player mode to prevent computer moves
@@ -134,6 +140,29 @@ describe('TicTacToe Component', () => {
       })
       
       // Try to click the same cell again
+      await user.click(cells[0])
+      
+      expect(toast).toHaveBeenCalledWith('Cell has been selected already', { type: 'error' })
+      expect(cells[0].textContent).toBe('x') // Should still be 'x'
+    })
+
+    it('should not allow clicking on already filled cells when playing multi-player', async () => {
+      render(<TicTacToe />)
+      
+      const cells = getGameCells()
+      
+      // Click first cell
+      await user.click(cells[0])
+      
+      // Wait for the cell to be filled with 'x'
+      await waitFor(() => {
+        expect(cells[0].textContent).toBe('x')
+      }, { timeout: 1000 })
+      
+      // Wait for computer move to complete
+      await waitForComputerMove()
+      
+      // Try to click the same cell again (should show error)
       await user.click(cells[0])
       
       expect(toast).toHaveBeenCalledWith('Cell has been selected already', { type: 'error' })
@@ -539,11 +568,12 @@ describe('TicTacToe Component', () => {
       // Player makes first move
       await user.click(cells[0])
       
-      // Wait for computer move
-      await waitFor(() => {
-        const filledCells = cells.filter(cell => cell.textContent !== '')
-        expect(filledCells.length).toBeGreaterThan(1)
-      }, { timeout: 3000 })
+      // Wait for computer move using timer advancement
+      await waitForComputerMove()
+      
+      // Verify that there are exactly 2 filled cells (X and O)
+      const filledCells = cells.filter(cell => cell.textContent !== '')
+      expect(filledCells.length).toBe(2)
     })
 
     it('should not allow player moves during computer turn', async () => {
@@ -570,11 +600,12 @@ describe('TicTacToe Component', () => {
       // Player makes first move
       await user.click(cells[0])
       
-      // Wait for computer move
-      await waitFor(() => {
-        const filledCells = cells.filter(cell => cell.textContent !== '')
-        expect(filledCells.length).toBeGreaterThan(1)
-      }, { timeout: 3000 })
+      // Wait for computer move using timer advancement
+      await waitForComputerMove()
+      
+      // Verify that there are exactly 2 filled cells (X and O)
+      const filledCells = cells.filter(cell => cell.textContent !== '')
+      expect(filledCells.length).toBe(2)
     })
 
     it('should handle computer wins correctly', async () => {
@@ -587,10 +618,12 @@ describe('TicTacToe Component', () => {
       // For now, just test that computer moves work
       await user.click(cells[0])
       
-      await waitFor(() => {
-        const filledCells = cells.filter(cell => cell.textContent !== '')
-        expect(filledCells.length).toBeGreaterThan(1)
-      }, { timeout: 3000 })
+      // Wait for computer move using timer advancement
+      await waitForComputerMove()
+      
+      // Verify that there are exactly 2 filled cells (X and O)
+      const filledCells = cells.filter(cell => cell.textContent !== '')
+      expect(filledCells.length).toBe(2)
     })
   })
 
