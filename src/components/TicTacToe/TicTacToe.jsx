@@ -1,140 +1,93 @@
-import { useEffect, useState } from "react"
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from 'react'
+import { useTicTacToe } from './hooks/useTicTacToe'
+import GameBoard from './components/GameBoard'
+import GameControls from './components/GameControls'
+import './TicTacToe.css'
 
-function TicTacToe () {
-  const boardInitialStateGen = () => JSON.parse(JSON.stringify([
-    [null, null, null],
-    [null, null, null],
-    [null, null, null]
-  ]));
-  const [turn, setTurn] = useState(true)
-  const [scoreX, setScoreX] = useState(0)
-  const [scoreO, setScoreO] = useState(0)
-  const [board, setBoard] = useState(boardInitialStateGen())
+const TicTacToe = () => {
   const [isSinglePlayer, setIsSinglePlayer] = useState(true)
+  
+  const {
+    board,
+    currentPlayer,
+    scores,
+    gameStatus,
+    winner,
+    emptyCells,
+    isGameOver,
+    makeMove,
+    resetGame,
+    resetScores,
+    makeComputerMove,
+    switchGameMode
+  } = useTicTacToe()
 
-  useEffect(()=>{
-    if (JSON.stringify(board) !== JSON.stringify(boardInitialStateGen())) {
-      checkBoard()
+  // Handle computer moves in single player mode
+  useEffect(() => {
+    if (isSinglePlayer && currentPlayer === 'O' && gameStatus === 'playing') {
+      const timer = setTimeout(() => {
+        makeComputerMove()
+      }, 700)
+      
+      return () => clearTimeout(timer)
     }
-  }, [board])
+  }, [currentPlayer, gameStatus, isSinglePlayer, makeComputerMove])
 
-  useEffect(()=>{
-    if (JSON.stringify(board) !== JSON.stringify(boardInitialStateGen())) {
-      if (isSinglePlayer && !turn) {
-        setTimeout(makeComputerMove, 700)
-      }
+  // Auto-reset game when game ends
+  useEffect(() => {
+    if (isGameOver) {
+      const timer = setTimeout(() => {
+        resetGame()
+      }, 2000)
+      
+      return () => clearTimeout(timer)
     }
-  }, [turn])
+  }, [isGameOver, resetGame])
 
-
-  function resetBoard() {
-    setBoard(boardInitialStateGen())
-    setTurn(true)
+  const handleCellClick = (row, col) => {
+    if (isSinglePlayer && currentPlayer === 'O') {
+      return // Don't allow clicks during computer's turn
+    }
+    makeMove(row, col)
   }
 
-  function checkBoard() {
-    const combinations = [
-      // Horizontals
-      `${board[0][0]}${board[0][1]}${board[0][2]}`,
-      `${board[1][0]}${board[1][1]}${board[1][2]}`,
-      `${board[2][0]}${board[2][1]}${board[2][2]}`,
-      // Verticals
-      `${board[0][0]}${board[1][0]}${board[2][0]}`,
-      `${board[0][1]}${board[1][1]}${board[2][1]}`,
-      `${board[0][2]}${board[1][2]}${board[2][2]}`,
-
-      // Diagonals
-      `${board[0][0]}${board[1][1]}${board[2][2]}`,
-      `${board[2][0]}${board[1][1]}${board[0][2]}`,
-    ]
-
-    const winnerValue = turn ? 'truetruetrue' : 'falsefalsefalse';
-
-    if (combinations.includes(winnerValue)) {
-      toast(`${turn ? 'X' : 'O' } Wins!`)
-      turn ? setScoreX(scoreX + 1) : setScoreO(scoreO + 1)
-      return resetBoard()
-    }
-
-    const emptyCells = getEmptyCells()
-    if (emptyCells.length === 0) {
-      toast(`Stalemate!`)
-      return resetBoard()
-    }
-    setTurn(!turn)
+  const handleToggleMode = () => {
+    const newMode = !isSinglePlayer
+    setIsSinglePlayer(newMode)
+    switchGameMode(newMode)
   }
 
-  function getEmptyCells() {
-    const emptyCells = []
-
-    for (let x = 0; x < 3; x++) {
-      for (let y = 0; y < 3; y++) {
-        if (board[x][y] === null) emptyCells.push([x, y])
-      }
-    }
-
-    return emptyCells
+  const handleResetGame = () => {
+    resetGame()
   }
 
-  function makeComputerMove() {
-    const emptyCells = getEmptyCells()
-    const [x, y] =  emptyCells[Math.floor(Math.random() * emptyCells.length)]
-    markCell(x, y, true)
-  }
-
-  function markCell(x,y) {
-    if (board[x][y] !== null) {
-      toast('Cell has been selected already', { type: 'error' })
-      return
-    }
-
-    const newBoard = JSON.parse(JSON.stringify(board))
-    newBoard[x][y] = turn
-
-    setBoard(newBoard)
-  }
-
-  function toggleSinglePlayer() {
-    resetBoard()
-    setIsSinglePlayer(!isSinglePlayer)
-    setScoreX(0)
-    setScoreO(0)
-  }
-
-  function Cell({ x, y }) {
-    const value = board[x][y];
-    return <div className="btn btn-dark d-inline cell align-middle text-center " onClick={()=>{markCell(x,y)}}>
-      {value && 'x'}
-      {value === false && 'o'}
+  return (
+    <div className="tic-tac-toe-container">
+      <GameControls
+        scores={scores}
+        currentPlayer={currentPlayer}
+        gameStatus={gameStatus}
+        isSinglePlayer={isSinglePlayer}
+        onToggleMode={handleToggleMode}
+        onResetGame={handleResetGame}
+      />
+      
+      <GameBoard
+        board={board}
+        onCellClick={handleCellClick}
+        currentPlayer={currentPlayer}
+        gameStatus={gameStatus}
+      />
+      
+      {isGameOver && (
+        <div className="text-center mt-3">
+          <div className="alert alert-info">
+            {winner ? `${winner} won the game!` : 'Game ended in a draw!'}
+          </div>
+        </div>
+      )}
     </div>
-  }
-
-  return <>
-    <div className="my-5 tic-tac-toe-score d-flex justify-content-between">
-      <div className="btn btn-primary" onClick={toggleSinglePlayer}>Playing: {isSinglePlayer ? 'Single Player' : 'Two players'}</div>
-      <div className="btn btn-light">Score: X ({scoreX}) O ({scoreO})</div>
-    </div>
-    <div className="tic-tac-toe bg-dark my-1">
-      <div className="d-flex row justify-content-center">
-        <Cell x={0} y={0}/>
-        <Cell x={0} y={1}/>
-        <Cell x={0} y={2}/>
-      </div>
-      <div className="d-flex row justify-content-center">
-        <Cell x={1} y={0}/>
-        <Cell x={1} y={1}/>
-        <Cell x={1} y={2}/>
-      </div>
-      <div className="d-flex row justify-content-center">
-        <Cell x={2} y={0}/>
-        <Cell x={2} y={1}/>
-        <Cell x={2} y={2}/>
-      </div>
-    </div>
-  </>
-
+  )
 }
-
 
 export default TicTacToe

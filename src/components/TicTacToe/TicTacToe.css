@@ -1,0 +1,104 @@
+.tic-tac-toe-container {
+  max-width: 500px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.tic-tac-toe {
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  margin: 2px;
+  border: 2px solid #495057;
+  border-radius: 4px;
+  font-size: 2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: lowercase;
+}
+
+.cell.clickable {
+  background-color: #6c757d;
+  color: white;
+}
+
+.cell.clickable:hover {
+  background-color: #5a6268;
+  transform: scale(1.05);
+}
+
+.cell.clickable:focus {
+  outline: 3px solid #007bff;
+  outline-offset: 2px;
+}
+
+.cell.disabled {
+  background-color: #495057;
+  color: #adb5bd;
+  cursor: not-allowed;
+}
+
+.cell:not(.disabled) {
+  background-color: #6c757d;
+  color: white;
+}
+
+/* Game status animations */
+.alert {
+  animation: fadeIn 0.5s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive design */
+@media (max-width: 576px) {
+  .cell {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+  
+  .tic-tac-toe-score {
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .tic-tac-toe-score .d-flex {
+    justify-content: center;
+  }
+}
+
+/* Accessibility improvements */
+.cell[aria-label]:focus {
+  outline: 3px solid #007bff;
+  outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .cell {
+    border-width: 3px;
+  }
+  
+  .cell.clickable:focus {
+    outline-width: 4px;
+  }
+} 
